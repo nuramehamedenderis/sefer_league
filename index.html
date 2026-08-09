@@ -1,37 +1,354 @@
-<div id="timer">01:30</div> sefer_league
-Sefer League 3D Football Game
-<div id="timer">01:30</div><div id="team">HOME 0 — 0 AWAY</div>
-<div id="timer">01:30</div>// =========================
-// MATCH TIMER
-// =========================
 
-let matchTime = 90;
-let matchRunning = true;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Sefer League 3D Football</title>
 
-function updateMatchTimer() {
-  const timer = document.getElementById("timer");
+<style>
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#111;
+  font-family:Arial,sans-serif;
+  touch-action:none;
+}
+#game{width:100%;height:100%}
 
-  if (!timer) return;
+#score{
+  position:fixed;
+  top:15px;
+  left:50%;
+  transform:translateX(-50%);
+  color:white;
+  background:rgba(0,0,0,.7);
+  padding:10px 22px;
+  border-radius:12px;
+  font-size:20px;
+  font-weight:bold;
+  text-align:center;
+  z-index:10;
+}
+#team{font-size:12px;margin-top:4px;opacity:.85}
+#timer{font-size:16px;color:#ffd700;margin-top:5px}
 
-  const minutes = Math.floor(matchTime / 60);
-  const seconds = matchTime % 60;
+#message{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  color:white;
+  font-size:28px;
+  font-weight:bold;
+  text-align:center;
+  text-shadow:0 2px 8px #000;
+  z-index:30;
+  pointer-events:none;
+  white-space:pre-line;
+}
 
-  timer.textContent =
-    String(minutes).padStart(2, "0") +
-    ":" +
-    String(seconds).padStart(2, "0");
+#joystick{
+  position:fixed;
+  left:25px;
+  bottom:30px;
+  width:125px;
+  height:125px;
+  border-radius:50%;
+  background:rgba(255,255,255,.18);
+  border:2px solid rgba(255,255,255,.4);
+  z-index:20;
+}
+#stick{
+  position:absolute;
+  left:35px;
+  top:35px;
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  background:rgba(255,255,255,.7);
+}
 
-  if (matchTime <= 0) {
-    matchRunning = false;
-    timer.textContent = "FULL TIME";
+.buttons{
+  position:fixed;
+  right:20px;
+  bottom:30px;
+  display:flex;
+  gap:12px;
+  z-index:20;
+}
+button{
+  width:75px;
+  height:75px;
+  border:0;
+  border-radius:50%;
+  color:white;
+  font-size:15px;
+  font-weight:bold;
+  background:rgba(20,20,20,.75);
+  border:2px solid rgba(255,255,255,.45);
+}
+#shoot{background:rgba(220,40,40,.85)}
+#pass{background:rgba(40,90,220,.85)}
+
+#newMatch{
+  display:none;
+  position:fixed;
+  left:50%;
+  top:62%;
+  transform:translate(-50%,-50%);
+  width:150px;
+  height:55px;
+  border-radius:12px;
+  background:#168a35;
+  z-index:40;
+}
+</style>
+</head>
+
+<body>
+
+<div id="score">
+  SEFER LEAGUE ⚽
+  <div id="team">HOME 0 — 0 AWAY</div>
+  <div id="timer">01:30</div>
+</div>
+
+<div id="game"></div>
+<div id="message"></div>
+
+<button id="newMatch">NEW MATCH</button>
+
+<div id="joystick">
+  <div id="stick"></div>
+</div>
+
+<div class="buttons">
+  <button id="pass">PASS</button>
+  <button id="shoot">SHOOT</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
+
+<script>
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+
+const camera = new THREE.PerspectiveCamera(
+  60,
+  innerWidth/innerHeight,
+  .1,
+  1000
+);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+
+document.getElementById("game").appendChild(renderer.domElement);
+
+/* LIGHT */
+
+const sun = new THREE.DirectionalLight(0xffffff,1.4);
+sun.position.set(20,40,20);
+scene.add(sun);
+
+scene.add(new THREE.HemisphereLight(
+  0xffffff,
+  0x555555,
+  1
+));
+
+/* FIELD */
+
+const field = new THREE.Mesh(
+  new THREE.BoxGeometry(42,.2,70),
+  new THREE.MeshStandardMaterial({color:0x178a35})
+);
+
+field.position.y=-.1;
+scene.add(field);
+
+/* FIELD LINES */
+
+function line(x,z,w,d){
+  const m=new THREE.Mesh(
+    new THREE.BoxGeometry(w,.03,d),
+    new THREE.MeshBasicMaterial({color:0xffffff})
+  );
+  m.position.set(x,.02,z);
+  scene.add(m);
+}
+
+line(0,-35,42,.2);
+line(0,35,42,.2);
+line(-21,0,.2,70);
+line(21,0,.2,70);
+line(0,0,42,.12);
+
+/* CENTER CIRCLE */
+
+const circle=new THREE.Mesh(
+  new THREE.RingGeometry(5.9,6.1,64),
+  new THREE.MeshBasicMaterial({
+    color:0xffffff,
+    side:THREE.DoubleSide
+  })
+);
+
+circle.rotation.x=-Math.PI/2;
+circle.position.y=.04;
+scene.add(circle);
+
+/* GOALS */
+
+function createGoal(z){
+
+  const material=new THREE.MeshStandardMaterial({
+    color:0xffffff
+  });
+
+  const bar=new THREE.Mesh(
+    new THREE.BoxGeometry(7,.35,.35),
+    material
+  );
+  bar.position.set(0,4,z);
+
+  const left=new THREE.Mesh(
+    new THREE.BoxGeometry(.35,4,.35),
+    material
+  );
+  left.position.set(-3.5,2,z);
+
+  const right=new THREE.Mesh(
+    new THREE.BoxGeometry(.35,4,.35),
+    material
+  );
+  right.position.set(3.5,2,z);
+
+  scene.add(bar,left,right);
+}
+
+createGoal(-35);
+createGoal(35);
+
+/* PLAYER */
+
+function createPlayer(color){
+
+  const group=new THREE.Group();
+
+  const body=new THREE.Mesh(
+    new THREE.CylinderGeometry(.7,.85,1.6,16),
+    new THREE.MeshStandardMaterial({color})
+  );
+
+  body.position.y=1.3;
+
+  const head=new THREE.Mesh(
+    new THREE.SphereGeometry(.48,16,16),
+    new THREE.MeshStandardMaterial({color:0xc6865b})
+  );
+
+  head.position.y=2.45;
+
+  group.add(body,head);
+  scene.add(group);
+
+  return group;
+}
+
+const player=createPlayer(0x1e4fff);
+player.position.set(0,0,15);
+
+/* OPPONENTS */
+
+const enemies=[];
+
+for(let i=0;i<4;i++){
+
+  const e=createPlayer(0xff2222);
+
+  e.position.set(
+    (Math.random()-.5)*16,
+    0,
+    -5-i*6
+  );
+
+  enemies.push(e);
+}
+
+/* BALL */
+
+const ball=new THREE.Mesh(
+  new THREE.SphereGeometry(.55,20,20),
+  new THREE.MeshStandardMaterial({color:0xffffff})
+);
+
+ball.position.set(0,.55,10);
+scene.add(ball);
+
+/* SHADOW */
+
+const shadow=new THREE.Mesh(
+  new THREE.CircleGeometry(.6,20),
+  new THREE.MeshBasicMaterial({
+    color:0x000000,
+    transparent:true,
+    opacity:.3
+  })
+);
+
+shadow.rotation.x=-Math.PI/2;
+shadow.position.y=.02;
+scene.add(shadow);
+
+/* GAME DATA */
+
+let scoreHome=0;
+let scoreAway=0;
+
+let ballVelocity=new THREE.Vector3();
+
+let moveX=0;
+let moveZ=0;
+
+const speed=.13;
+
+/* MATCH TIMER */
+
+let matchTime=90;
+let matchRunning=true;
+
+function updateTimer(){
+
+  const timer=document.getElementById("timer");
+
+  const minutes=Math.floor(matchTime/60);
+  const seconds=matchTime%60;
+
+  timer.textContent=
+    String(minutes).padStart(2,"0")+":"+
+    String(seconds).padStart(2,"0");
+
+  if(matchTime<=0){
+
+    matchRunning=false;
+    timer.textContent="FULL TIME";
 
     showMessage(
-      "🏁 FULL TIME!\nHOME " +
-      scoreHome +
-      " — " +
-      scoreAway +
+      "🏁 FULL TIME!\nHOME "+
+      scoreHome+
+      " — "+
+      scoreAway+
       " AWAY"
     );
+
+    document.getElementById("newMatch").style.display="block";
 
     return;
   }
@@ -39,11 +356,287 @@ function updateMatchTimer() {
   matchTime--;
 }
 
-setInterval(() => {
-  if (matchRunning) {
-    updateMatchTimer();
+setInterval(()=>{
+  if(matchRunning){
+    updateTimer();
   }
-}, 1000);
+},1000);
 
-updateMatchTimer();
+updateTimer();
+
+/* JOYSTICK */
+
+const joystick=document.getElementById("joystick");
+const stick=document.getElementById("stick");
+
+let joyActive=false;
+
+function joystickMove(e){
+
+  const rect=joystick.getBoundingClientRect();
+
+  const cx=rect.left+rect.width/2;
+  const cy=rect.top+rect.height/2;
+
+  let x=e.clientX-cx;
+  let y=e.clientY-cy;
+
+  const max=42;
+  const len=Math.sqrt(x*x+y*y);
+
+  if(len>max){
+    x=x/len*max;
+    y=y/len*max;
+  }
+
+  stick.style.left=(35+x)+"px";
+  stick.style.top=(35+y)+"px";
+
+  moveX=x/max;
+  moveZ=y/max;
+}
+
+joystick.addEventListener("pointerdown",e=>{
+  joyActive=true;
+  joystick.setPointerCapture(e.pointerId);
+  joystickMove(e);
+});
+
+joystick.addEventListener("pointermove",e=>{
+  if(joyActive) joystickMove(e);
+});
+
+joystick.addEventListener("pointerup",()=>{
+  joyActive=false;
+  moveX=0;
+  moveZ=0;
+  stick.style.left="35px";
+  stick.style.top="35px";
+});
+
+/* SHOOT */
+
+document.getElementById("shoot").addEventListener("pointerdown",()=>{
+
+  if(!matchRunning) return;
+
+  const direction=new THREE.Vector3(0,0,-1);
+
+  ballVelocity.copy(direction.multiplyScalar(.55));
+  ballVelocity.y=.08;
+
+  showMessage("SHOOT ⚽");
+});
+
+/* PASS */
+
+document.getElementById("pass").addEventListener("pointerdown",()=>{
+
+  if(!matchRunning) return;
+
+  const direction=new THREE.Vector3(0,0,-1);
+
+  ballVelocity.copy(direction.multiplyScalar(.3));
+
+  showMessage("PASS!");
+});
+
+/* MESSAGE */
+
+let messageTimer;
+
+function showMessage(text){
+
+  const msg=document.getElementById("message");
+
+  msg.textContent=text;
+
+  clearTimeout(messageTimer);
+
+  messageTimer=setTimeout(()=>{
+    if(matchRunning) msg.textContent="";
+  },900);
+}
+
+/* GOAL */
+
+function goal(home){
+
+  if(!matchRunning) return;
+
+  if(home){
+    scoreHome++;
+  }else{
+    scoreAway++;
+  }
+
+  document.getElementById("team").textContent=
+    "HOME "+scoreHome+" — "+scoreAway+" AWAY";
+
+  showMessage("⚽ GOAL!");
+
+  ball.position.set(0,.55,0);
+  ballVelocity.set(0,0,0);
+
+  player.position.set(0,0,15);
+}
+
+/* PLAYER */
+
+function updatePlayer(){
+
+  if(!matchRunning) return;
+
+  player.position.x+=moveX*speed;
+  player.position.z+=moveZ*speed;
+
+  player.position.x=
+    THREE.MathUtils.clamp(
+      player.position.x,-19,19
+    );
+
+  player.position.z=
+    THREE.MathUtils.clamp(
+      player.position.z,-32,32
+    );
+
+  const distance=player.position.distanceTo(ball.position);
+
+  if(distance<1.5 && ballVelocity.length()<.2){
+
+    ball.position.x=player.position.x;
+    ball.position.z=player.position.z-1;
+  }
+}
+
+/* BALL */
+
+function updateBall(){
+
+  if(!matchRunning) return;
+
+  ball.position.add(ballVelocity);
+
+  ballVelocity.multiplyScalar(.97);
+
+  ballVelocity.y-=.004;
+
+  if(ball.position.y<.55){
+
+    ball.position.y=.55;
+    ballVelocity.y*=-.25;
+  }
+
+  if(ball.position.x>20 || ball.position.x<-20){
+    ballVelocity.x*=-.7;
+  }
+
+  if(ball.position.z<-35){
+    goal(true);
+  }
+
+  if(ball.position.z>35){
+    goal(false);
+  }
+
+  shadow.position.x=ball.position.x;
+  shadow.position.z=ball.position.z;
+}
+
+/* ENEMIES */
+
+function updateEnemies(){
+
+  if(!matchRunning) return;
+
+  enemies.forEach(e=>{
+
+    const dx=player.position.x-e.position.x;
+    const dz=player.position.z-e.position.z;
+
+    const distance=Math.sqrt(dx*dx+dz*dz);
+
+    if(distance>1.8){
+
+      e.position.x+=dx/distance*.025;
+      e.position.z+=dz/distance*.025;
+    }
+  });
+}
+
+/* CAMERA */
+
+function updateCamera(){
+
+  const targetX=player.position.x;
+  const targetZ=player.position.z+7;
+
+  camera.position.x+=(targetX-camera.position.x)*.08;
+  camera.position.z+=(targetZ-camera.position.z)*.08;
+  camera.position.y=13;
+
+  camera.lookAt(
+    player.position.x,
+    0,
+    player.position.z-8
+  );
+}
+
+/* NEW MATCH */
+
+document.getElementById("newMatch").addEventListener("click",()=>{
+
+  scoreHome=0;
+  scoreAway=0;
+
+  matchTime=90;
+  matchRunning=true;
+
+  document.getElementById("team").textContent=
+    "HOME 0 — 0 AWAY";
+
+  document.getElementById("timer").textContent="01:30";
+
+  document.getElementById("message").textContent="";
+
+  document.getElementById("newMatch").style.display="none";
+
+  player.position.set(0,0,15);
+  ball.position.set(0,.55,10);
+  ballVelocity.set(0,0,0);
+});
+
+/* CAMERA START */
+
+camera.position.set(0,13,25);
+camera.lookAt(0,0,10);
+
+/* RESIZE */
+
+addEventListener("resize",()=>{
+
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(innerWidth,innerHeight);
+});
+
+/* GAME LOOP */
+
+function animate(){
+
+  requestAnimationFrame(animate);
+
+  updatePlayer();
+  updateBall();
+  updateEnemies();
+  updateCamera();
+
+  renderer.render(scene,camera);
+}
+
 animate();
+
+</script>
+</body>
+</html>
