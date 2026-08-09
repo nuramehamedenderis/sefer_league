@@ -1,4 +1,49 @@
 <div id="timer">01:30</div> sefer_league
 Sefer League 3D Football Game
 <div id="timer">01:30</div><div id="team">HOME 0 — 0 AWAY</div>
-<div id="timer">01:30</div>
+<div id="timer">01:30</div>// =========================
+// MATCH TIMER
+// =========================
+
+let matchTime = 90;
+let matchRunning = true;
+
+function updateMatchTimer() {
+  const timer = document.getElementById("timer");
+
+  if (!timer) return;
+
+  const minutes = Math.floor(matchTime / 60);
+  const seconds = matchTime % 60;
+
+  timer.textContent =
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(seconds).padStart(2, "0");
+
+  if (matchTime <= 0) {
+    matchRunning = false;
+    timer.textContent = "FULL TIME";
+
+    showMessage(
+      "🏁 FULL TIME!\nHOME " +
+      scoreHome +
+      " — " +
+      scoreAway +
+      " AWAY"
+    );
+
+    return;
+  }
+
+  matchTime--;
+}
+
+setInterval(() => {
+  if (matchRunning) {
+    updateMatchTimer();
+  }
+}, 1000);
+
+updateMatchTimer();
+animate();
