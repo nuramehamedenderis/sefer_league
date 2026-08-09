@@ -274,4 +274,9 @@ button:hover {
   .score {
     font-size: 25px;
   }
+}#timer{
+  font-size:16px;
+  color:#ffd700;
+  text-align:center;
+  margin-top:5px;
 }
