@@ -244,3 +244,48 @@ updateScore();
 updateTimer();
 
 console.log("Sefer League V1 started!");
+// =========================
+// MATCH TIMER
+// =========================
+
+let matchTime = 90;
+let matchRunning = true;
+
+function updateMatchTimer() {
+  const timer = document.getElementById("timer");
+
+  if (!timer) return;
+
+  const minutes = Math.floor(matchTime / 60);
+  const seconds = matchTime % 60;
+
+  timer.textContent =
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(seconds).padStart(2, "0");
+
+  if (matchTime <= 0) {
+    matchRunning = false;
+    timer.textContent = "FULL TIME";
+
+    showMessage(
+      "🏁 FULL TIME!\nHOME " +
+      scoreHome +
+      " — " +
+      scoreAway +
+      " AWAY"
+    );
+
+    return;
+  }
+
+  matchTime--;
+}
+
+setInterval(() => {
+  if (matchRunning) {
+    updateMatchTimer();
+  }
+}, 1000);
+
+updateMatchTimer();
