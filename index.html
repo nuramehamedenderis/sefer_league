@@ -99,6 +99,50 @@ button{
   text-shadow:0 2px 8px #000;
   z-index:30;
   pointer-events:none;
+ let matchTime = 90;
+let matchRunning = true;
+
+function updateTimer(){
+
+  const timer = document.getElementById("timer");
+
+  if(!timer) return;
+
+  const minutes = Math.floor(matchTime / 60);
+  const seconds = matchTime % 60;
+
+  timer.textContent =
+    String(minutes).padStart(2,"0") + ":" +
+    String(seconds).padStart(2,"0");
+
+  if(matchTime <= 0){
+
+    matchRunning = false;
+    timer.textContent = "FULL TIME";
+
+    showMessage(
+      "🏁 FULL TIME!\nHOME " +
+      scoreHome +
+      " — " +
+      scoreAway +
+      " AWAY"
+    );
+
+    document.getElementById("newMatch").style.display = "block";
+
+    return;
+  }
+
+  matchTime--;
+}
+
+updateTimer();
+
+setInterval(function(){
+  if(matchRunning){
+    updateTimer();
+  }
+},1000);
 }
 </style>
 </head>
