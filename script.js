@@ -1,246 +1,275 @@
-// =====================================
-// SEFER LEAGUE V1 - GAME SCRIPT
-// =====================================
+/* =========================
+   SEFER LEAGUE 3D FOOTBALL
+   script.js
+   ========================= */
 
-const player = document.querySelector(".player");
-const ball = document.querySelector(".ball");
-const scoreElement = document.querySelector(".score");
-const timerElement = document.querySelector(".timer");
+const scene = new THREE.Scene();
 
-// Game state
-let playerX = 50;
-let playerY = 50;
+scene.background = new THREE.Color(0x87ceeb);
 
-let ballX = 50;
-let ballY = 50;
 
-let blueScore = 0;
-let redScore = 0;
+/* CAMERA */
 
-let seconds = 90;
-let gameRunning = true;
+const camera = new THREE.PerspectiveCamera(
+  60,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
 
-const speed = 1.5;
-const kickPower = 8;
 
-// -------------------------------------
-// Player movement
-// -------------------------------------
+/* RENDERER */
 
-function movePlayer(dx, dy) {
-  if (!gameRunning || !player) return;
-
-  playerX += dx;
-  playerY += dy;
-
-  // Keep player inside field
-  playerX = Math.max(4, Math.min(96, playerX));
-  playerY = Math.max(5, Math.min(95, playerY));
-
-  updatePlayer();
-  checkBallDistance();
-}
-
-function updatePlayer() {
-  if (!player) return;
-
-  player.style.left = playerX + "%";
-  player.style.top = playerY + "%";
-}
-
-// -------------------------------------
-// Ball
-// -------------------------------------
-
-function updateBall() {
-  if (!ball) return;
-
-  ball.style.left = ballX + "%";
-  ball.style.top = ballY + "%";
-}
-
-function checkBallDistance() {
-  const distance = Math.sqrt(
-    Math.pow(playerX - ballX, 2) +
-    Math.pow(playerY - ballY, 2)
-  );
-
-  if (distance < 8) {
-    ballX += (ballX - playerX) * 0.08;
-    ballY += (ballY - playerY) * 0.08;
-
-    ballX = Math.max(3, Math.min(97, ballX));
-    ballY = Math.max(4, Math.min(96, ballY));
-
-    updateBall();
-  }
-}
-
-// -------------------------------------
-// Kick
-// -------------------------------------
-
-function kickBall() {
-  if (!gameRunning) return;
-
-  const dx = ballX - playerX;
-  const dy = ballY - playerY;
-
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  if (distance < 12) {
-    if (distance === 0) {
-      ballX += kickPower;
-    } else {
-      ballX += (dx / distance) * kickPower;
-      ballY += (dy / distance) * kickPower;
-    }
-
-    ballX = Math.max(2, Math.min(98, ballX));
-    ballY = Math.max(3, Math.min(97, ballY));
-
-    updateBall();
-
-    checkGoal();
-  }
-}
-
-// -------------------------------------
-// Goal detection
-// -------------------------------------
-
-function checkGoal() {
-  // Left goal
-  if (ballX <= 3 && ballY > 38 && ballY < 62) {
-    redScore++;
-    updateScore();
-    resetBall();
-  }
-
-  // Right goal
-  if (ballX >= 97 && ballY > 38 && ballY < 62) {
-    blueScore++;
-    updateScore();
-    resetBall();
-  }
-}
-
-function updateScore() {
-  if (!scoreElement) return;
-
-  scoreElement.textContent =
-    blueScore + " - " + redScore;
-}
-
-function resetBall() {
-  ballX = 50;
-  ballY = 50;
-
-  updateBall();
-}
-
-// -------------------------------------
-// Keyboard controls
-// -------------------------------------
-
-document.addEventListener("keydown", function(event) {
-
-  if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") {
-    movePlayer(0, -speed);
-  }
-
-  if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
-    movePlayer(0, speed);
-  }
-
-  if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
-    movePlayer(-speed, 0);
-  }
-
-  if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
-    movePlayer(speed, 0);
-  }
-
-  if (event.code === "Space") {
-    event.preventDefault();
-    kickBall();
-  }
+const renderer = new THREE.WebGLRenderer({
+  antialias: true
 });
 
-// -------------------------------------
-// Mobile buttons
-// -------------------------------------
+renderer.setSize(
+  window.innerWidth,
+  window.innerHeight
+);
 
-function setupButton(id, dx, dy) {
-  const button = document.getElementById(id);
+renderer.setPixelRatio(
+  Math.min(window.devicePixelRatio, 2)
+);
 
-  if (!button) return;
+document
+  .getElementById("game")
+  .appendChild(renderer.domElement);
 
-  button.addEventListener("touchstart", function(event) {
-    event.preventDefault();
-    movePlayer(dx, dy);
-  });
 
-  button.addEventListener("click", function() {
-    movePlayer(dx, dy);
-  });
+/* LIGHT */
+
+const sun = new THREE.DirectionalLight(
+  0xffffff,
+  1.4
+);
+
+sun.position.set(20, 40, 20);
+
+scene.add(sun);
+
+scene.add(
+  new THREE.HemisphereLight(
+    0xffffff,
+    0x555555,
+    1
+  )
+);
+
+
+/* FIELD */
+
+const field = new THREE.Mesh(
+  new THREE.BoxGeometry(42, 0.2, 70),
+  new THREE.MeshStandardMaterial({
+    color: 0x178a35
+  })
+);
+
+field.position.y = -0.1;
+
+scene.add(field);
+
+
+/* FIELD LINES */
+
+function fieldLine(x, z, w, d) {
+
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(w, 0.03, d),
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff
+    })
+  );
+
+  mesh.position.set(x, 0.02, z);
+
+  scene.add(mesh);
 }
 
-setupButton("up", 0, -speed);
-setupButton("down", 0, speed);
-setupButton("left", -speed, 0);
-setupButton("right", speed, 0);
+fieldLine(0, -35, 42, 0.2);
+fieldLine(0, 35, 42, 0.2);
+fieldLine(-21, 0, 0.2, 70);
+fieldLine(21, 0, 0.2, 70);
+fieldLine(0, 0, 42, 0.12);
 
-// Kick button
-const kickButton = document.getElementById("kick");
 
-if (kickButton) {
-  kickButton.addEventListener("click", kickBall);
+/* CENTER CIRCLE */
 
-  kickButton.addEventListener("touchstart", function(event) {
-    event.preventDefault();
-    kickBall();
-  });
+const centerCircle = new THREE.Mesh(
+  new THREE.RingGeometry(5.9, 6.1, 64),
+  new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide
+  })
+);
+
+centerCircle.rotation.x = -Math.PI / 2;
+centerCircle.position.y = 0.04;
+
+scene.add(centerCircle);
+
+
+/* GOALS */
+
+function createGoal(z) {
+
+  const material =
+    new THREE.MeshStandardMaterial({
+      color: 0xffffff
+    });
+
+  const bar = new THREE.Mesh(
+    new THREE.BoxGeometry(7, 0.35, 0.35),
+    material
+  );
+
+  bar.position.set(0, 4, z);
+
+  const leftPost = new THREE.Mesh(
+    new THREE.BoxGeometry(0.35, 4, 0.35),
+    material
+  );
+
+  leftPost.position.set(-3.5, 2, z);
+
+  const rightPost = new THREE.Mesh(
+    new THREE.BoxGeometry(0.35, 4, 0.35),
+    material
+  );
+
+  rightPost.position.set(3.5, 2, z);
+
+  scene.add(
+    bar,
+    leftPost,
+    rightPost
+  );
 }
 
-// -------------------------------------
-// Match timer
-// -------------------------------------
+createGoal(-35);
+createGoal(35);
 
-function updateTimer() {
-  if (!timerElement) return;
 
-  const minutes = Math.floor(seconds / 60);
-  const secs = seconds % 60;
+/* PLAYER */
 
-  timerElement.textContent =
-    minutes + ":" + String(secs).padStart(2, "0");
+function createPlayer(color) {
 
-  if (seconds <= 0) {
-    gameRunning = false;
-    timerElement.textContent = "FULL TIME";
+  const player = new THREE.Group();
 
-    alert(
-      "Full Time!\n\n" +
-      "Sefer League\n" +
-      blueScore + " - " + redScore
-    );
+  const body = new THREE.Mesh(
+    new THREE.CylinderGeometry(
+      0.7,
+      0.85,
+      1.6,
+      16
+    ),
+    new THREE.MeshStandardMaterial({
+      color: color
+    })
+  );
 
-    return;
-  }
+  body.position.y = 1.3;
 
-  seconds--;
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(
+      0.48,
+      16,
+      16
+    ),
+    new THREE.MeshStandardMaterial({
+      color: 0xc6865b
+    })
+  );
+
+  head.position.y = 2.45;
+
+  player.add(
+    body,
+    head
+  );
+
+  scene.add(player);
+
+  return player;
 }
 
-setInterval(updateTimer, 1000);
 
-// -------------------------------------
-// Start game
-// -------------------------------------
+const player =
+  createPlayer(0x1e4fff);
 
-updatePlayer();
-updateBall();
-updateScore();
-updateTimer();
+player.position.set(
+  0,
+  0,
+  15
+);
 
-console.log("Sefer League V1 started!");
+
+/* ENEMIES */
+
+const enemies = [];
+
+for (let i = 0; i < 4; i++) {
+
+  const enemy =
+    createPlayer(0xff2222);
+
+  enemy.position.set(
+    (Math.random() - 0.5) * 16,
+    0,
+    -5 - i * 6
+  );
+
+  enemies.push(enemy);
+}
+
+
+/* BALL */
+
+const ball = new THREE.Mesh(
+  new THREE.SphereGeometry(
+    0.55,
+    20,
+    20
+  ),
+  new THREE.MeshStandardMaterial({
+    color: 0xffffff
+  })
+);
+
+ball.position.set(
+  0,
+  0.55,
+  10
+);
+
+scene.add(ball);
+
+
+/* BALL SHADOW */
+
+const ballShadow = new THREE.Mesh(
+  new THREE.CircleGeometry(
+    0.6,
+    20
+  ),
+  new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    transparent: true,
+    opacity: 0.3
+  })
+);
+
+ballShadow.rotation.x =
+  -Math.PI / 2;
+
+ballShadow.position.y = 0.02;
+
+scene.add(ballShadow);
+
+
+/* GAME VARIABLES */
+
+let scoreHome = 0;
+let scoreAway =
