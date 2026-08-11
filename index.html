@@ -1,353 +1,836 @@
-<!DOCTYPE html>
-<html lang="en">
+
+nurata<!DOCTYPE html>
+<html lang="am">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>Sefer League 3D Football</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sefer League</title>
 
-<style>
-*{box-sizing:border-box}
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#111;
-  font-family:Arial,sans-serif;
-  touch-action:none;
-}
+<div class="welcome">
 
-#game{
-  width:100%;
-  height:100%;
-}
+    <img src="images/logo.png" class="logo" alt="Sefer League">
 
-#score{
-  position:fixed;
-  top:15px;
-  left:50%;
-  transform:translateX(-50%);
-  color:white;
-  background:rgba(0,0,0,.7);
-  padding:10px 22px;
-  border-radius:12px;
-  font-size:20px;
-  font-weight:bold;
-  text-align:center;
-  z-index:10;
-}
+    <h1>⚽ Sefer League</h1>
 
-#team{
-  font-size:13px;
-  margin-top:4px;
-}
+    <p>
+        ወደ ሰፈር ሊግ መተግበሪያ እንኳን በደህና መጡ
+    </p>
 
-#timer{
-  font-size:17px;
-  color:#ffd700;
-  margin-top:5px;
-}
+    <a href="login.html" class="btn">
+        ግባ
+    </a>
 
-#message{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  color:white;
-  font-size:28px;
-  font-weight:bold;
-  text-align:center;
-  text-shadow:0 2px 8px #000;
-  z-index:30;
-  pointer-events:none;
-  white-space:pre-line;
-}
+    <a href="register.html" class="btn2">
+        አዲስ መለያ ፍጠር
+    </a>
 
-#joystick{
-  position:fixed;
-  left:25px;
-  bottom:30px;
-  width:125px;
-  height:125px;
-  border-radius:50%;
-  background:rgba(255,255,255,.18);
-  border:2px solid rgba(255,255,255,.4);
-  z-index:20;
-}
+</div>
 
-#stick{
-  position:absolute;
-  left:35px;
-  top:35px;
-  width:55px;
-  height:55px;
-  border-radius:50%;
-  background:rgba(255,255,255,.7);
-}
+<footer>
 
-.buttons{
-  position:fixed;
-  right:20px;
-  bottom:30px;
-  display:flex;
-  gap:12px;
-  z-index:20;
-}
+© 2026 Sefer League
 
-button{
-  width:75px;
-  height:75px;
-  border:0;
-  border-radius:50%;
-  color:white;
-  font-size:15px;
-  font-weight:bold;
-  border:2px solid rgba(255,255,255,.45);
-}
+</footer>
 
-#shoot{
-  background:rgba(220,40,40,.85);
-}
+<script src="js/app.js"></script>
 
-#pass{
-  background:rgba(40,90,220,.85);
-}
+</body>
+</html> <!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sefer League - Login</title>
 
-#newMatch{
-  display:none;
-  position:fixed;
-  left:50%;
-  top:62%;
-  transform:translate(-50%,-50%);
-  width:150px;
-  height:55px;
-  border-radius:12px;
-  background:#168a35;
-  z-index:40;
-}
-</style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<div id="score">
-  SEFER LEAGUE ⚽
-  <div id="team">HOME 0 — 0 AWAY</div>
-  <div id="timer">01:30</div>
+<div class="welcome">
+
+    <img src="images/logo.png" class="logo" alt="Logo">
+
+    <h2>ግባ</h2>
+
+    <form id="loginForm">
+
+        <input
+            type="text"
+            id="email"
+            placeholder="ስልክ ቁጥር ወይም Email"
+            required>
+
+        <br><br>
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required>
+
+        <br><br>
+
+        <button
+            type="submit"
+            class="btn">
+            ግባ
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="register.html" class="btn2">
+        አዲስ መለያ ፍጠር
+    </a>
+
 </div>
-
-<div id="game"></div>
-
-<div id="message"></div>
-
-<button id="newMatch">NEW MATCH</button>
-
-<div id="joystick">
-  <div id="stick"></div>
-</div>
-
-<div class="buttons">
-  <button id="pass">PASS</button>
-  <button id="shoot">SHOOT</button>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
 
 <script>
 
-/* =========================
-   SEFER LEAGUE 3D FOOTBALL
-   ========================= */
+document.getElementById("loginForm")
+.addEventListener("submit",function(e){
 
-const scene = new THREE.Scene();
+e.preventDefault();
 
-scene.background = new THREE.Color(0x87ceeb);
+let email=document.getElementById("email").value;
 
+let password=document.getElementById("password").value;
 
-/* CAMERA */
+if(email==="" || password===""){
 
-const camera = new THREE.PerspectiveCamera(
-  60,
-  window.innerWidth/window.innerHeight,
-  0.1,
-  1000
-);
+alert("መረጃውን ያስገቡ");
 
+return;
 
-/* RENDERER */
+}
 
-const renderer = new THREE.WebGLRenderer({
-  antialias:true
+alert("Login Success");
+
+window.location="home.html";
+
 });
 
-renderer.setSize(
-  window.innerWidth,
-  window.innerHeight
-);
+</script>
 
-renderer.setPixelRatio(
-  Math.min(window.devicePixelRatio,2)
-);
+</body>
+</html> <div class="card">
+<h2>🏆 League Table</h2>
 
-document
-  .getElementById("game")
-  .appendChild(renderer.domElement);
+<table>
+<tr>
+<th>Rank</th>
+<th>Club</th>
+<th>Played</th>
+<th>Points</th>
+</tr>
 
+<tr>
+<td>1</td>
+<td>Abeba FC</td>
+<td>5</td>
+<td>13</td>
+</tr>
 
-/* LIGHT */
+<tr>
+<td>2</td>
+<td>Wello United</td>
+<td>5</td>
+<td>10</td>
+</tr>
 
-const sun = new THREE.DirectionalLight(
-  0xffffff,
-  1.4
-);
+</table>
 
-sun.position.set(20,40,20);
-
-scene.add(sun);
-
-scene.add(
-  new THREE.HemisphereLight(
-    0xffffff,
-    0x555555,
-    1
-  )
-);
-
-
-/* FIELD */
-
-const field = new THREE.Mesh(
-  new THREE.BoxGeometry(42,.2,70),
-  new THREE.MeshStandardMaterial({
-    color:0x178a35
-  })
-);
-
-field.position.y=-.1;
-
-scene.add(field);
+</div>
 
 
-/* FIELD LINES */
+<div class="card">
+<h2>📅 Match Schedule</h2>
 
-function fieldLine(x,z,w,d){
+<p>⚽ Abeba FC vs Wello United</p>
+<p>Date: 10/08/2026</p>
+<p>Time: 18:00</p>
 
-  const m = new THREE.Mesh(
-    new THREE.BoxGeometry(w,.03,d),
-    new THREE.MeshBasicMaterial({
-      color:0xffffff
-    })
-  );
+</div>
 
-  m.position.set(x,.02,z);
 
-  scene.add(m);
+<div class="card">
+<h2>🔴 Live Score</h2>
+
+<h3 id="score">
+Abeba FC 0 - 0 Wello United
+</h3>
+
+<button onclick="goalHome()">Goal Abeba FC</button>
+
+<button onclick="goalAway()">Goal Wello United</button>
+
+</div> <div class="card">
+<h2>🎥 Football Video</h2>
+
+<input type="file" id="videoFile" accept="video/*">
+
+<button onclick="uploadVideo()">Upload Video</button>
+
+<div id="videoArea"></div>
+
+</div> <div class="card">
+
+<h2>👑 Admin Dashboard</h2>
+
+<input id="adminClub" placeholder="Add Club Name">
+
+<button onclick="addClub()">
+Add Club
+</button>
+
+<ul id="adminList"></ul>
+
+</div>
+
+
+<div class="card">
+
+<h2>💳 Payment</h2>
+
+<p>Club Registration Fee: 100 Birr</p>
+
+<button onclick="pay()">
+Pay Now
+</button>
+
+<p id="paymentStatus"></p>
+
+</div>
+
+
+<div class="card">
+
+<h2>🔥 Firebase Database</h2>
+
+<p id="firebaseStatus">
+Connecting...
+</p>
+
+</div> <div class="card">
+  <h2>🏆 Tournament Bracket</h2>
+
+  <div class="round">
+    <h3>Quarter Final</h3>
+
+    <div class="match">
+      <span>Team A</span>
+      <span>VS</span>
+      <span>Team B</span>
+    </div>
+
+    <div class="match">
+      <span>Team C</span>
+      <span>VS</span>
+      <span>Team D</span>
+    </div>
+
+    <div class="match">
+      <span>Team E</span>
+      <span>VS</span>
+      <span>Team F</span>
+    </div>
+
+    <div class="match">
+      <span>Team G</span>
+      <span>VS</span>
+      <span>Team H</span>
+    </div>
+  </div>
+
+  <div class="round">
+    <h3>Semi Final</h3>
+
+    <div class="match">
+      <span id="semi1">Winner QF1</span>
+      <span>VS</span>
+      <span id="semi2">Winner QF2</span>
+    </div>
+
+    <div class="match">
+      <span id="semi3">Winner QF3</span>
+      <span>VS</span>
+      <span id="semi4">Winner QF4</span>
+    </div>
+  </div>
+
+  <div class="round">
+    <h3>Final</h3>
+
+    <div class="match">
+      <span id="final1">Winner SF1</span>
+      <span>VS</span>
+      <span id="final2">Winner SF2</span>
+    </div>
+  </div>
+
+  <button onclick="champion()">
+    👑 Show Champion
+  </button>
+
+  <h2 id="winner"></h2>
+</div><div class="card">
+<h2>👤 Player Profile</h2>
+
+<img id="playerPhoto"
+src="https://via.placeholder.com/150"
+alt="Player">
+
+<input type="file"
+id="photoInput"
+accept="image/*">
+
+<input type="text"
+id="playerName"
+placeholder="Player Name">
+
+<input type="text"
+id="playerTeam"
+placeholder="Team">
+
+<input type="text"
+id="playerPosition"
+placeholder="Position">
+
+<input type="number"
+id="playerNumber"
+placeholder="Jersey Number">
+
+<input type="number"
+id="playerGoals"
+placeholder="Goals">
+
+<input type="number"
+id="playerAssists"
+placeholder="Assists">
+
+<button onclick="saveProfile()">
+Save Profile
+</button>
+
+<div id="profileCard"></div>
+
+</div><div class="card">
+
+<h2>🏅 Top Scorers</h2>
+
+<input type="text" id="scorerName" placeholder="Player Name">
+
+<input type="text" id="scorerTeam" placeholder="Team">
+
+<input type="number" id="goalCount" placeholder="Goals">
+
+<button onclick="addScorer()">
+Add Player
+</button>
+
+<table id="scorerTable">
+
+<thead>
+<tr>
+<th>Rank</th>
+<th>Player</th>
+<th>Team</th>
+<th>Goals</th>
+</tr>
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
+`` <div class="card">
+
+<h2>📊 Match Statistics</h2>
+
+<h3>Team A vs Team B</h3>
+
+<table id="statsTable">
+<tr>
+<th>Statistic</th>
+<th>Team A</th>
+<th>Team B</th>
+</tr>
+
+<tr>
+<td>⚽ Shots</td>
+<td id="shotA">0</td>
+<td id="shotB">0</td>
+</tr>
+
+<tr>
+<td>🎯 Shots on Target</td>
+<td id="targetA">0</td>
+<td id="targetB">0</td>
+</tr>
+
+<tr>
+<td>🚩 Corners</td>
+<td id="cornerA">0</td>
+<td id="cornerB">0</td>
+</tr>
+
+<tr>
+<td>❌ Fouls</td>
+<td id="foulA">0</td>
+<td id="foulB">0</td>
+</tr>
+
+<tr>
+<td>🟨 Yellow Cards</td>
+<td id="yellowA">0</td>
+<td id="yellowB">0</td>
+</tr>
+
+<tr>
+<td>🟥 Red Cards</td>
+<td id="redA">0</td>
+<td id="redB">0</td>
+</tr>
+</table>
+
+<div class="buttons">
+<button onclick="updateStat('shotA')">Team A Shot</button>
+<button onclick="updateStat('shotB')">Team B Shot</button>
+
+<button onclick="updateStat('targetA')">Target A</button>
+<button onclick="updateStat('targetB')">Target B</button>
+
+<button onclick="updateStat('cornerA')">Corner A</button>
+<button onclick="updateStat('cornerB')">Corner B</button>
+
+<button onclick="updateStat('foulA')">Foul A</ <div class="card">
+
+<h2>🔔 Live Match Events</h2>
+
+<div class="event-buttons">
+
+<button onclick="addEvent('⚽ Goal!')">Goal</button>
+
+<button onclick="addEvent('🟨 Yellow Card')">Yellow Card</button>
+
+<button onclick="addEvent('🟥 Red Card')">Red Card</button>
+
+<button onclick="addEvent('🔄 Substitution')">Substitution</button>
+
+<button onclick="addEvent('⏸ Half Time')">Half Time</button>
+
+<button onclick="addEvent('🏁 Full Time')">Full Time</button>
+
+</div>
+
+<ul id="eventList"></ul>
+
+</div> <div class="card">
+
+<h2>🔍 Team & Player Search</h2>
+
+<input
+type="text"
+id="searchInput"
+placeholder="Search team or player..."
+onkeyup="searchData()">
+
+<ul id="searchResults"></ul>
+
+</div> <div class="card">
+
+<h2>⭐ Favorite Team</h2>
+
+<select id="teamSelect">
+<option value="">Select Team</option>
+<option>Abeba FC</option>
+<option>Wello United</option>
+<option>Kemise City</option>
+<option>Sheger FC</option>
+<option>Bahir Dar FC</option>
+</select>
+
+<button onclick="followTeam()">
+⭐ Follow Team
+</button>
+
+<h3 id="favoriteTeam"></h3>
+
+<div id="teamNews"></div>
+
+</div> <div class="card">
+
+<h2>📺 Live Match Streaming</h2>
+
+<video id="liveVideo" controls width="100%">
+<source src="" type="video/mp4">
+Your browser does not support video.
+</video>
+
+<input type="file" id="videoInput" accept="video/*">
+
+<button onclick="loadVideo()">Load Video</button>
+
+<hr>
+
+<h2>💬 Live Chat</h2>
+
+<div id="chatBox"></div>
+
+<input type="text" id="chatInput" placeholder="Write a message...">
+
+<button onclick="sendMessage()">Send</button>
+
+</div> <div class="card">
+
+<h2>🎟 Match Ticket Booking</h2>
+
+<input type="text" id="fanName" placeholder="Your Name">
+
+<select id="seatSelect">
+<option value="">Select Seat</option>
+<option>A1</option>
+<option>A2</option>
+<option>A3</option>
+<option>B1</option>
+<option>B2</option>
+<option>B3</option>
+<option>C1</option>
+<option>C2</option>
+<option>C3</option>
+</select>
+
+<button onclick="bookSeat()">Book Ticket</button>
+
+<div id="ticket"></div>
+
+</div> <div class="card">
+
+<h2>🎫 QR Ticket</h2>
+
+<input id="ticketName" placeholder="Fan Name">
+
+<input id="ticketSeat" placeholder="Seat Number">
+
+<button onclick="generateTicket()">
+Generate Ticket
+</button>
+
+<div id="ticketCard"></div>
+
+</div> <div class="card">
+
+<h2>🔐 Firebase Login</h2>
+
+<input type="email" id="email" placeholder="Email">
+
+<input type="password" id="password" placeholder="Password">
+
+<button onclick="registerUser()">Register</button>
+
+<button onclick="loginUser()">Login</button>
+
+<button onclick="logoutUser()">Logout</button>
+
+<p id="status"></p>
+
+</div> <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+import {
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+signOut
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+const firebaseConfig = {
+
+apiKey:"YOUR_API_KEY",
+
+authDomain:"YOUR_PROJECT.firebaseapp.com",
+
+projectId:"YOUR_PROJECT_ID",
+
+storageBucket:"YOUR_PROJECT.appspot.com",
+
+messagingSenderId:"YOUR_SENDER_ID",
+
+appId:"YOUR_APP_ID"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+window.registerUser = function(){
+
+const email =
+document.getElementById("email").value;
+
+const password =
+document.getElementById("password").value;
+
+createUserWithEmailAndPassword(auth,email,password)
+.then(()=>{
+
+document.getElementById("status").innerHTML =
+"✅ Registered Successfully";
+
+})
+.catch(error=>{
+
+document.getElementById("status").innerHTML =
+error.message;
+
+});
+
 }
 
-fieldLine(0,-35,42,.2);
-fieldLine(0,35,42,.2);
-fieldLine(-21,0,.2,70);
-fieldLine(21,0,.2,70);
-fieldLine(0,0,42,.12);
+window.loginUser=function(){
 
+const email =
+document.getElementById("email").value;
 
-/* CENTER CIRCLE */
+const password =
+document.getElementById("password").value;
 
-const circle = new THREE.Mesh(
-  new THREE.RingGeometry(
-    5.9,
-    6.1,
-    64
-  ),
-  new THREE.MeshBasicMaterial({
-    color:0xffffff,
-    side:THREE.DoubleSide
-  })
-);
+signInWithEmailAndPassword(auth,email,password)
+.then(()=>{
 
-circle.rotation.x=-Math.PI/2;
+document.getElementById("status").innerHTML =
+"✅ Login Successful";
 
-circle.position.y=.04;
+})
+.catch(error=>{
 
-scene.add(circle);
+document.getElementById("status").innerHTML =
+error.message;
 
+});
 
-/* GOALS */
-
-function createGoal(z){
-
-  const material =
-    new THREE.MeshStandardMaterial({
-      color:0xffffff
-    });
-
-  const bar = new THREE.Mesh(
-    new THREE.BoxGeometry(
-      7,.35,.35
-    ),
-    material
-  );
-
-  bar.position.set(0,4,z);
-
-  const left = new THREE.Mesh(
-    new THREE.BoxGeometry(
-      .35,4,.35
-    ),
-    material
-  );
-
-  left.position.set(-3.5,2,z);
-
-  const right = new THREE.Mesh(
-    new THREE.BoxGeometry(
-      .35,4,.35
-    ),
-    material
-  );
-
-  right.position.set(3.5,2,z);
-
-  scene.add(
-    bar,
-    left,
-    right
-  );
 }
 
-createGoal(-35);
-createGoal(35);
+window.logoutUser=function(){
 
+signOut(auth).then(()=>{
 
-/* PLAYER */
+document.getElementById("status").innerHTML =
+"👋 Logged Out";
 
-function createPlayer(color){
+});
 
-  const group =
-    new THREE.Group();
+}
+</script><div class="card">
 
-  const body =
-    new THREE.Mesh(
-      new THREE.CylinderGeometry(
-        .7,.85,1.6,16
-      ),
-      new THREE.MeshStandardMaterial({
-        color:color
-      })setInterval(() => {
-  const timer = document.getElementById("timer");
+<h2>⚽ Save Club</h2>
 
-  if (matchTime > 0) {
-    matchTime--;
+<input
+id="clubName"
+placeholder="Club Name">
 
-    const minutes = Math.floor(matchTime / 60);
-    const seconds = matchTime % 60;
+<input
+id="clubCity"
+placeholder="City">
 
-    timer.textContent =
-      String(minutes).padStart(2, "0") + ":" +
-      String(seconds).padStart(2, "0");
-  } else {
-    timer.textContent = "FULL TIME";
-  }
-}, 1000);
-    );
+<button onclick="saveClub()">
+Save Club
+</button>
+
+<button onclick="loadClubs()">
+Load Clubs
+</button>
+
+<div id="clubList"></div>
+
+</div> window.loadClubs = async function(){
+
+const snapshot =
+await getDocs(collection(db,"clubs"));
+
+let html="";
+
+snapshot.forEach(doc=>{
+
+const club=doc.data();
+
+html += `
+<div class="card">
+<h3>${club.name}</h3>
+<p>📍 ${club.city}</p>
+</div>
+`;
+
+});
+
+document.getElementById("clubList").innerHTML=html;
+
+}<div class="card">
+
+<h2>🎥 Upload Video</h2>
+
+<input
+type="file"
+id="videoFile"
+accept="video/*">
+
+<button onclick="uploadVideo()">
+Upload
+</button>
+
+<div id="uploadStatus"></div>
+
+<video
+id="videoPlayer"
+controls
+width="100%">
+</video>
+
+</div> <input
+type="file"
+id="imageFile"
+accept="image/*">
+
+<button onclick="uploadImage()">
+Upload Image
+</button>
+
+<img
+id="previewImage"
+width="250"> <div class="card">
+
+<h2>💬 Live Chat</h2>
+
+<div id="chatMessages"></div>
+
+<input
+type="text"
+id="userName"
+placeholder="Your Name">
+
+<input
+type="text"
+id="chatMessage"
+placeholder="Write message...">
+
+<button onclick="sendMessage()">
+Send
+</button>
+
+</div> const q = query(
+collection(db,"chat"),
+orderBy("time")
+);
+
+onSnapshot(q,(snapshot)=>{
+
+let html="";
+
+snapshot.forEach(doc=>{
+
+const data = doc.data();
+
+html += `
+<div class="chat-item">
+
+<div class="chat-name">
+👤 ${data.name}
+</div>
+
+<div>
+${data.message}
+</div>
+
+</div>
+`;
+
+});
+
+document.getElementById("chatMessages").innerHTML = html;
+
+const chat =
+document.getElementById("chatMessages");
+
+chat.scrollTop = chat.scrollHeight;
+
+}); <div class="card">
+
+<h2>⚽ Live Score</h2>
+
+<h1 id="liveScore">
+0 - 0
+</h1>
+
+<input
+type="number"
+id="homeScore"
+placeholder="Home Score">
+
+<input
+type="number"
+id="awayScore"
+placeholder="Away Score">
+
+<button onclick="updateScore()">
+Update Score
+</button>
+
+</div> <div class="card">
+
+<h2>👑 Super Admin Dashboard</h2>
+
+<div class="dashboard">
+
+<div class="box">
+<h3 id="clubsCount">0</h3>
+<p>⚽ Clubs</p>
+</div>
+
+<div class="box">
+<h3 id="playersCount">0</h3>
+<p>👤 Players</p>
+</div>
+
+<div class="box">
+<h3 id="matchesCount">0</h3>
+<p>🏆 Matches</p>
+</div>
+
+<div class="box">
+<h3 id="videosCount">0</h3>
+<p>🎥 Videos</p>
+</div>
+
+<div class="box">
+<h3 id="usersCount">0</h3>
+<p>👥 Users</p>
+</div>
+
+<div class="box">
+<h3 id="paymentsCount">0</h3>
+<p>💳 Payments</p>
+</div>
+
+</div>
+
+<button onclick="loadDashboard()">
+🔄 Refresh Dashboard
+</button>
+
+</div><link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#00ff88"><button id="installBtn" hidden>
+
+📱 Install App
+
+</button>
