@@ -1,255 +1,609 @@
-* {
-  box-sizing: border-box;
+
+/* ========= Sefer League ========= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
 }
 
-html,
-body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #111;
-  font-family: Arial, sans-serif;
-  touch-action: none;
-  user-select: none;
+body{
+    background:linear-gradient(135deg,#0b6623,#1b8f3d);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#fff;
 }
 
-#game {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+.welcome{
+    width:90%;
+    max-width:420px;
+    background:rgba(255,255,255,.12);
+    backdrop-filter:blur(10px);
+    border-radius:20px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 10px 25px rgba(0,0,0,.3);
 }
 
-#game canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
+.logo{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    background:#fff;
+    object-fit:cover;
+    margin-bottom:20px;
 }
 
-#score {
-  position: fixed;
-  top: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-
-  min-width: 190px;
-  padding: 10px 20px;
-
-  color: #fff;
-  background: rgba(0, 0, 0, 0.72);
-
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-
-  pointer-events: none;
+h1{
+    font-size:32px;
+    margin-bottom:15px;
 }
 
-#team {
-  margin-top: 5px;
-  font-size: 13px;
-  opacity: 0.9;
+p{
+    font-size:17px;
+    line-height:1.5;
+    margin-bottom:30px;
 }
 
-#timer {
-  margin-top: 5px;
-  font-size: 17px;
-  color: #ffd700;
+.btn,
+.btn2{
+    display:block;
+    width:100%;
+    text-decoration:none;
+    padding:15px;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:15px;
+    transition:.3s;
 }
 
-#message {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  z-index: 30;
-
-  color: #fff;
-  font-size: 30px;
-  font-weight: bold;
-  text-align: center;
-
-  text-shadow:
-    0 2px 5px #000,
-    0 0 15px #000;
-
-  pointer-events: none;
-  white-space: pre-line;
+.btn{
+    background:#ffd700;
+    color:#000;
 }
 
-/* JOYSTICK */
-
-#joystick {
-  position: fixed;
-  left: 25px;
-  bottom: 30px;
-
-  width: 125px;
-  height: 125px;
-
-  z-index: 20;
-
-  border-radius: 50%;
-
-  background: rgba(255, 255, 255, 0.18);
-
-  border: 2px solid rgba(255, 255, 255, 0.4);
-
-  touch-action: none;
+.btn:hover{
+    background:#ffbf00;
 }
 
-#stick {
-  position: absolute;
-
-  left: 35px;
-  top: 35px;
-
-  width: 55px;
-  height: 55px;
-
-  border-radius: 50%;
-
-  background: rgba(255, 255, 255, 0.75);
-
-  box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.3);
-
-  pointer-events: none;
+.btn2{
+    background:#ffffff;
+    color:#0b6623;
 }
 
-/* BUTTONS */
-
-.buttons {
-  position: fixed;
-
-  right: 20px;
-  bottom: 30px;
-
-  display: flex;
-  gap: 12px;
-
-  z-index: 20;
+.btn2:hover{
+    background:#eeeeee;
 }
 
-button {
-  width: 75px;
-  height: 75px;
-
-  border: 2px solid rgba(255, 255, 255, 0.45);
-  border-radius: 50%;
-
-  color: #fff;
-
-  font-size: 14px;
-  font-weight: bold;
-
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.35);
-
-  touch-action: manipulation;
-  user-select: none;
+footer{
+    position:fixed;
+    bottom:10px;
+    width:100%;
+    text-align:center;
+    font-size:14px;
+    color:#ffffff;
 }
 
-button:active {
-  transform: scale(0.92);
+@media(max-width:600px){
+
+    h1{
+        font-size:26px;
+    }
+
+    p{
+        font-size:15px;
+    }
+
+    .btn,
+    .btn2{
+        font-size:16px;
+    }
+
+} <!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sefer League - Register</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+input,select{
+
+width:100%;
+padding:15px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+font-size:16px;
+
 }
 
-#pass {
-  background: rgba(40, 90, 220, 0.88);
+</style>
+
+</head>
+<body>
+
+<div class="welcome">
+
+<img src="images/logo.png" class="logo">
+
+<h2>አዲስ መለያ ፍጠር</h2>
+
+<form id="registerForm">
+
+<input
+type="text"
+id="fullname"
+placeholder="ሙሉ ስም"
+required>
+
+<input
+type="tel"
+id="phone"
+placeholder="ስልክ ቁጥር"
+required>
+
+<input
+type="email"
+id="email"
+placeholder="Email">
+
+<input
+type="password"
+id="password"
+placeholder="Password"
+required>
+
+<select id="role">
+
+<option>ተመልካች</option>
+
+<option>ተጫዋች</option>
+
+<option>አሰልጣኝ</option>
+
+<option>ወኪል</option>
+
+</select>
+
+<br><br>
+
+<button class="btn">
+
+መመዝገብ
+
+</button>
+
+</form>
+
+<br>
+
+<a href="login.html" class="btn2">
+
+መግቢያ
+
+</a>
+
+</div>
+
+<script>
+
+document.getElementById("registerForm")
+
+.addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const user={
+
+name:fullname.value,
+
+phone:phone.value,
+
+email:email.value,
+
+password:password.value,
+
+role:role.value
+
+};
+
+localStorage.setItem("user",JSON.stringify(user));
+
+alert("በተሳካ ሁኔታ ተመዝግበዋል!");
+
+window.location="login.html";
+
+});
+
+</script>
+
+</body>
+</html> table{
+width:100%;
+border-collapse:collapse;
 }
 
-#shoot {
-  background: rgba(220, 40, 40, 0.88);
+th,td{
+border:1px solid white;
+padding:10px;
+text-align:center;
 }
 
-/* NEW MATCH */
-
-#newMatch {
-  display: none;
-
-  position: fixed;
-
-  left: 50%;
-  top: 62%;
-
-  transform: translate(-50%, -50%);
-
-  z-index: 40;
-
-  width: 155px;
-  height: 55px;
-
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  border-radius: 12px;
-
-  background: #168a35;
-
-  color: white;
-
-  font-size: 16px;
-  font-weight: bold;
-
-  box-shadow:
-    0 5px 15px rgba(0, 0, 0, 0.4);
+h3{
+text-align:center;
+color:#00ff88;
+} video{
+width:100%;
+border-radius:15px;
+margin-top:15px;
 }
 
-#newMatch:active {
-  transform: translate(-50%, -50%) scale(0.94);
+.actions button{
+margin:5px;
+background:#00ff88;
+} .card button{
+margin-top:10px;
 }
 
-/* SMALL PHONES */
+#adminList li{
+list-style:none;
+} .round{
+margin:20px 0;
+}
 
-@media (max-width: 420px) {
+.match{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:#222;
+padding:12px;
+margin:10px 0;
+border-radius:10px;
+border:1px solid #00ff88;
+}
 
-  #score {
-    top: 10px;
-    padding: 8px 16px;
-    font-size: 17px;
-  }
+.match span{
+font-weight:bold;
+}
 
-  #team {
-    font-size: 12px;
-  }
+#winner{
+text-align:center;
+color:gold;
+margin-top:20px;
+} #playerPhoto{
+width:150px;
+height:150px;
+border-radius:50%;
+object-fit:cover;
+display:block;
+margin:auto;
+border:4px solid #00ff88;
+}
 
-  #timer {
-    font-size: 15px;
-  }
+#profileCard{
+margin-top:20px;
+background:#222;
+padding:15px;
+border-radius:12px;
+color:white;
+text-align:center;
+}
 
-  #joystick {
-    left: 15px;
-    bottom: 20px;
+#profileCard img{
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+margin-bottom:10px;
+}#scorerTable{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
 
-    width: 110px;
-    height: 110px;
-  }
+#scorerTable th,
+#scorerTable td{
+border:1px solid #00ff88;
+padding:10px;
+text-align:center;
+}
 
-  #stick {
-    left: 30px;
-    top: 30px;
+#scorerTable th{
+background:#00aa55;
+color:white;
+}
 
-    width: 50px;
-    height: 50px;
-  }
+#scorerTable tr:nth-child(even){
+background:#222;
+} #statsTable{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
 
-  .buttons {
-    right: 12px;
-    bottom: 20px;
-    gap: 8px;
-  }
+#statsTable th,
+#statsTable td{
+border:1px solid #00ff88;
+padding:10px;
+text-align:center;
+}
 
-  button {
-    width: 68px;
-    height: 68px;
-    font-size: 13px;
-  }
+#statsTable th{
+background:#00aa55;
+color:white;
+}
 
-  #message {
-    font-size: 25px;
-  }
+.buttons{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+margin-top:20px;
+}
+
+.buttons button{
+padding:10px;
+border:none;
+background:#00ff88;
+color:#000;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+} .event-buttons{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+margin-bottom:20px;
+}
+
+.event-buttons button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+background:#00ff88;
+font-weight:bold;
+cursor:pointer;
+}
+
+#eventList{
+list-style:none;
+padding:0;
+}
+
+#eventList li{
+background:#222;
+color:#fff;
+padding:12px;
+margin-bottom:10px;
+border-left:5px solid #00ff88;
+border-radius:8px;
+animation:slideIn .4s ease;
+}
+
+@keyframes slideIn{
+from{
+opacity:0;
+transform:translateX(-20px);
+}
+to{
+opacity:1;
+transform:translateX(0);
+}
+} #searchInput{
+width:100%;
+padding:12px;
+border:none;
+border-radius:8px;
+margin-bottom:15px;
+font-size:16px;
+}
+
+#searchResults{
+list-style:none;
+padding:0;
+}
+
+#searchResults li{
+background:#222;
+color:#fff;
+padding:12px;
+margin-bottom:8px;
+border-radius:8px;
+border-left:5px solid #00ff88;
+} #teamSelect{
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+margin:10px 0;
+}
+
+#favoriteTeam{
+color:#FFD700;
+margin-top:20px;
+}
+
+#teamNews{
+margin-top:20px;
+padding:15px;
+background:#222;
+border-radius:10px;
+border-left:5px solid #00ff88;
+color:white;
+} #chatBox{
+height:250px;
+overflow-y:auto;
+background:#222;
+padding:10px;
+border-radius:10px;
+margin:15px 0;
+}
+
+.message{
+background:#333;
+padding:10px;
+margin:8px 0;
+border-left:4px solid #00ff88;
+border-radius:6px;
+}
+
+#chatInput{
+width:100%;
+padding:12px;
+margin-bottom:10px;
+border-radius:8px;
+border:none;
+}
+
+video{
+border-radius:12px;
+margin-bottom:15px;
+} #seatSelect{
+width:100%;
+padding:12px;
+margin:10px 0;
+border-radius:8px;
+border:none;
+}
+
+#ticket{
+margin-top:20px;
+background:#222;
+padding:15px;
+border-radius:12px;
+border-left:5px solid gold;
+color:white;
+}
+
+.ticket-code{
+font-size:24px;
+font-weight:bold;
+color:#00ff88;
+margin-top:10px;
+}#ticketCard{
+margin-top:20px;
+background:#222;
+padding:20px;
+border-radius:12px;
+text-align:center;
+color:white;
+}
+
+#ticketCard img{
+width:180px;
+margin-top:15px;
+border-radius:10px;
+background:white;
+padding:8px;
+}
+
+#printBtn{
+margin-top:15px;
+background:#00ff88;
+color:black;
+padding:12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+} #chatMessages{
+height:300px;
+overflow-y:auto;
+background:#222;
+padding:10px;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+.chat-item{
+padding:10px;
+margin:8px 0;
+background:#333;
+border-left:4px solid #00ff88;
+border-radius:8px;
+}
+
+.chat-name{
+font-weight:bold;
+color:#00ff88;
+}#liveScore{
+
+font-size:50px;
+
+text-align:center;
+
+color:#00ff88;
+
+margin:20px 0;
+
+font-weight:bold;
+
+}.dashboard{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+
+gap:15px;
+
+margin:20px 0;
+
+}
+
+.box{
+
+background:#222;
+
+padding:20px;
+
+border-radius:12px;
+
+text-align:center;
+
+border:2px solid #00ff88;
+
+}
+
+.box h3{
+
+font-size:32px;
+
+color:#00ff88;
+
+margin:0;
+
+}
+
+.box p{
+
+margin-top:10px;
+
+color:white;
+
+}{
+  "name": "Sefer League",
+  "short_name": "League",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#00ff88",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
