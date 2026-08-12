@@ -625,3 +625,54 @@ animate();
 <div id="timer">01:30</div>
 <div id="team">HOME 0 — 0 AWAY</div>
 <div id="timer">01:30</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+  <title>Sefer League 3D Football</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div id="score">
+    SEFER LEAGUE ⚽
+
+    <div id="team">
+      HOME 0 — 0 AWAY
+    </div>
+
+    <div id="timer">
+      01:30
+    </div>
+  </div>
+
+  <div id="game"></div>
+
+  <div id="message"></div>
+
+  <button id="newMatch">
+    NEW MATCH
+  </button>
+
+  <div id="joystick">
+    <div id="stick"></div>
+  </div>
+
+  <div class="buttons">
+    <button id="pass">PASS</button>
+    <button id="shoot">SHOOT</button>
+  </div>
+
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
+
+  <!-- Sefer League JavaScript -->
+  <script src="script.js"></script>
+
+</body>
+</html>
