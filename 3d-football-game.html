@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sefer League 3D Football Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #gameContainer {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #ui {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      color: white;
+      font-size: 20px;
+      padding: 20px;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%);
+    }
+
+    #scoreBoard {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+      font-weight: bold;
+      font-size: 28px;
+    }
+
+    .team {
+      flex: 1;
+    }
+
+    .score {
+      font-size: 36px;
+      color: #ffd700;
+    }
+
+    .vs {
+      margin: 0 20px;
+      color: #00ff88;
+    }
+
+    #controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      color: white;
+      text-align: center;
+      z-index: 10;
+      border: 2px solid #00ff88;
+    }
+
+    .control-item {
+      margin: 8px 0;
+      font-size: 14px;
+    }
+
+    #gameStatus {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      padding: 40px;
+      border-radius: 15px;
+      color: white;
+      text-align: center;
+      z-index: 15;
+      display: none;
+      border: 3px solid #00d4ff;
+    }
+
+    #gameStatus h2 {
+      font-size: 36px;
+      color: #00d4ff;
+      margin-bottom: 20px;
+    }
+
+    #gameStatus p {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    #gameStatus button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      background: #00ff88;
+      border: none;
+      border-radius: 8px;
+      color: black;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #gameStatus button:hover {
+      background: #00dd77;
+      transform: scale(1.05);
+    }
+
+    #timer {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 24px;
+      color: #ffd700;
+      border: 2px solid #ffd700;
+      font-weight: bold;
+    }
+
+    #stats {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 10px;
+      color: #00ff88;
+      font-size: 12px;
+      border: 2px solid #00ff88;
+      max-width: 200px;
+    }
+
+    .stat-row {
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer"></div>
+
+  <div id="ui">
+    <div id="scoreBoard">
+      <div class="team">
+        <div>🟢 HOME</div>
+        <div class="score" id="homeScore">0</div>
+      </div>
+      <div class="vs">-</div>
+      <div class="team">
+        <div>🔵 AWAY</div>
+        <div class="score" id="awayScore">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="timer">45:00</div>
+
+  <div id="stats">
+    <div class="stat-row">
+      <span>Ball Possession:</span>
+      <span id="possession">50%</span>
+    </div>
+    <div class="stat-row">
+      <span>Passes:</span>
+      <span id="passes">0</span>
+    </div>
+    <div class="stat-row">
+      <span>Shots:</span>
+      <span id="shots">0</span>
+    </div>
+  </div>
+
+  <div id="controls">
+    <div style="font-weight: bold; margin-bottom: 10px;">⚽ SEFER LEAGUE 3D</div>
+    <div class="control-item">🎮 WASD or Arrow Keys - Move</div>
+    <div class="control-item">SPACE - Sprint</div>
+    <div class="control-item">MOUSE - Look Around</div>
+    <div class="control-item">LEFT CLICK - Kick/Pass</div>
+    <div class="control-item">R - Reset Game</div>
+  </div>
+
+  <div id="gameStatus">
+    <h2 id="statusTitle">Goal!</h2>
+    <p id="statusMessage">Sefer League!</p>
+    <button onclick="restartGame()">Continue Game</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Game Variables
+    let scene, camera, renderer;
+    let field, ball, players = [];
+    let homeScore = 0, awayScore = 0;
+    let gameTime = 2700; // 45 minutes in seconds
+    let gameActive = true;
+    let ballPossession = 'home';
+    let stats = { homePass: 0, awayPass: 0, homeShot: 0, awayShot: 0 };
+
+    // Controls
+    const keys = {};
+    let mouseX = 0, mouseY = 0;
+
+    // Initialize Game
+    function init() {
+      // Scene Setup
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x87ceeb);
+      scene.fog = new THREE.Fog(0x87ceeb, 200, 500);
+
+      // Camera
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 20, 40);
+      camera.lookAt(0, 0, 0);
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      document.getElementById('gameContainer').appendChild(renderer.domElement);
+
+      // Lighting
+      const sunlight = new THREE.DirectionalLight(0xffffff, 1);
+      sunlight.position.set(100, 100, 50);
+      sunlight.castShadow = true;
+      sunlight.shadow.mapSize.width = 2048;
+      sunlight.shadow.mapSize.height = 2048;
+      scene.add(sunlight);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambientLight);
+
+      // Create Football Field
+      createField();
+
+      // Create Ball
+      createBall();
+
+      // Create Players
+      createPlayers();
+
+      // Event Listeners
+      document.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
+      document.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+      document.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+      });
+      document.addEventListener('click', kickBall);
+      window.addEventListener('resize', onWindowResize);
+
+      // Start Game Loop
+      animate();
+      updateTimer();
+    }
+
+    // Create Field
+    function createField() {
+      // Ground
+      const groundGeometry = new THREE.PlaneGeometry(120, 80);
+      const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x2d8a2d });
+      const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      // Field Lines (grass)
+      const fieldGeometry = new THREE.PlaneGeometry(118, 78);
+      const fieldMaterial = new THREE.MeshLambertMaterial({ color: 0x22c72c });
+      const fieldMesh = new THREE.Mesh(fieldGeometry, fieldMaterial);
+      fieldMesh.rotation.x = -Math.PI / 2;
+      fieldMesh.position.y = 0.01;
+      fieldMesh.receiveShadow = true;
+      scene.add(fieldMesh);
+
+      // Goals
+      createGoal(-60, 0, 'home');
+      createGoal(60, 0, 'away');
+
+      // Boundaries
+      createBoundary(-60, 40, 120, 2);
+      createBoundary(-60, -40, 120, 2);
+      createBoundary(-60, 0, 2, 80);
+      createBoundary(60, 0, 2, 80);
+    }
+
+    // Create Goal
+    function createGoal(x, z, type) {
+      const goalGeometry = new THREE.BoxGeometry(15, 8, 2);
+      const goalMaterial = new THREE.MeshStandardMaterial({ 
+        color: type === 'home' ? 0x00ff00 : 0x0000ff,
+        emissive: type === 'home' ? 0x00aa00 : 0x0000aa
+      });
+      const goal = new THREE.Mesh(goalGeometry, goalMaterial);
+      goal.position.set(x, 4, z);
+      goal.castShadow = true;
+      goal.receiveShadow = true;
+      goal.userData = { type: 'goal', team: type };
+      scene.add(goal);
+    }
+
+    // Create Boundary
+    function createBoundary(x, z, width, height) {
+      const boundaryGeometry = new THREE.BoxGeometry(width, 1, height);
+      const boundaryMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, wireframe: true });
+      const boundary = new THREE.Mesh(boundaryGeometry, boundaryMaterial);
+      boundary.position.set(x, 0, z);
+      scene.add(boundary);
+    }
+
+    // Create Ball
+    function createBall() {
+      const ballGeometry = new THREE.SphereGeometry(1, 32, 32);
+      const ballMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0xffffff,
+        roughness: 0.5,
+        metalness: 0.1
+      });
+      ball = new THREE.Mesh(ballGeometry, ballMaterial);
+      ball.position.set(0, 1, 0);
+      ball.castShadow = true;
+      ball.receiveShadow = true;
+      ball.userData = { velocity: new THREE.Vector3(0, 0, 0) };
+      scene.add(ball);
+    }
+
+    // Create Players
+    function createPlayers() {
+      // Home Team (Green) - Left Side
+      for (let i = 0; i < 5; i++) {
+        const player = createPlayer(-40 + i * 10, 1, -20 + i * 8, 0x00ff00, 'home');
+        players.push(player);
+      }
+
+      // Away Team (Blue) - Right Side
+      for (let i = 0; i < 5; i++) {
+        const player = createPlayer(40 - i * 10, 1, 20 - i * 8, 0x0000ff, 'away');
+        players.push(player);
+      }
+    }
+
+    // Create Player
+    function createPlayer(x, y, z, color, team) {
+      const playerGeometry = new THREE.CapsuleGeometry(0.5, 2, 4, 8);
+      const playerMaterial = new THREE.MeshStandardMaterial({ color: color });
+      const player = new THREE.Mesh(playerGeometry, playerMaterial);
+      player.position.set(x, y, z);
+      player.castShadow = true;
+      player.receiveShadow = true;
+      player.userData = {
+        team: team,
+        velocity: new THREE.Vector3(0, 0, 0),
+        targetPos: new THREE.Vector3(x, y, z),
+        speed: 0.3
+      };
+      scene.add(player);
+      return player;
+    }
+
+    // Kick Ball
+    function kickBall() {
+      if (!gameActive) return;
+
+      const ballPos = ball.position;
+      let nearestPlayer = null;
+      let minDist = Infinity;
+
+      // Find nearest player to ball
+      players.forEach(player => {
+        const dist = ballPos.distanceTo(player.position);
+        if (dist < minDist && dist < 5) {
+          minDist = dist;
+          nearestPlayer = player;
+        }
+      });
+
+      if (nearestPlayer) {
+        // Calculate kick direction
+        const direction = new THREE.Vector3();
+        direction.subVectors(ball.position, nearestPlayer.position).normalize();
+        direction.y = 0.5;
+
+        // Apply force to ball
+        ball.userData.velocity = direction.multiplyScalar(3);
+        
+        // Update stats
+        if (nearestPlayer.userData.team === 'home') {
+          stats.homePass++;
+          stats.homeShot++;
+        } else {
+          stats.awayPass++;
+          stats.awayShot++;
+        }
+
+        // Check if goal
+        checkGoal();
+      }
+    }
+
+    // Check Goal
+    function checkGoal() {
+      if (ball.position.x < -58 && Math.abs(ball.position.z) < 7.5) {
+        // Away team scored
+        awayScore++;
+        goalScored('away');
+      } else if (ball.position.x > 58 && Math.abs(ball.position.z) < 7.5) {
+        // Home team scored
+        homeScore++;
+        goalScored('home');
+      }
+    }
+
+    // Goal Scored
+    function goalScored(team) {
+      gameActive = false;
+      document.getElementById('statusTitle').textContent = team === 'home' ? '🟢 HOME GOAL!' : '🔵 AWAY GOAL!';
+      document.getElementById('statusMessage').textContent = `${team.toUpperCase()} Team Scores! 🎉`;
+      document.getElementById('gameStatus').style.display = 'block';
+      updateScore();
+
+      // Reset ball
+      setTimeout(() => {
+        ball.position.set(0, 1, 0);
+        ball.userData.velocity.set(0, 0, 0);
+        gameActive = true;
+        document.getElementById('gameStatus').style.display = 'none';
+      }, 2000);
+    }
+
+    // Update Score
+    function updateScore() {
+      document.getElementById('homeScore').textContent = homeScore;
+      document.getElementById('awayScore').textContent = awayScore;
+    }
+
+    // Update Timer
+    function updateTimer() {
+      setInterval(() => {
+        if (gameActive && gameTime > 0) {
+          gameTime--;
+        }
+
+        const minutes = Math.floor(gameTime / 60);
+        const seconds = gameTime % 60;
+        document.getElementById('timer').textContent = 
+          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        // Update stats
+        document.getElementById('possession').textContent = ballPossession === 'home' ? '60%' : '40%';
+        document.getElementById('passes').textContent = stats.homePass + stats.awayPass;
+        document.getElementById('shots').textContent = stats.homeShot + stats.awayShot;
+
+        if (gameTime === 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    // End Game
+    function endGame() {
+      gameActive = false;
+      let winner = homeScore > awayScore ? '🟢 HOME TEAM' : awayScore > homeScore ? '🔵 AWAY TEAM' : 'DRAW';
+      document.getElementById('statusTitle').textContent = 'FULL TIME';
+      document.getElementById('statusMessage').textContent = `${homeScore} - ${awayScore}\n\nWinner: ${winner}`;
+      document.getElementById('gameStatus').style.display = 'block';
+    }
+
+    // Restart Game
+    function restartGame() {
+      location.reload();
+    }
+
+    // Animate
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Update ball physics
+      ball.position.add(ball.userData.velocity);
+      ball.userData.velocity.y -= 0.02; // Gravity
+      ball.userData.velocity.multiplyScalar(0.98); // Air resistance
+
+      // Ball boundaries
+      if (ball.position.y < 1) ball.position.y = 1;
+      if (Math.abs(ball.position.x) > 65) ball.position.x = ball.position.x > 0 ? 65 : -65;
+      if (Math.abs(ball.position.z) > 42) ball.position.z = ball.position.z > 0 ? 42 : -42;
+
+      // Update players
+      players.forEach(player => {
+        // Simple AI movement
+        const ballDist = player.position.distanceTo(ball.position);
+        if (ballDist < 30) {
+          player.userData.targetPos.copy(ball.position);
+        }
+
+        const direction = new THREE.Vector3().subVectors(player.userData.targetPos, player.position);
+        if (direction.length() > 0.5) {
+          direction.normalize().multiplyScalar(player.userData.speed);
+          player.position.add(direction);
+        }
+      });
+
+      // Update camera
+      if (keys['arrowup'] || keys['w']) camera.position.z -= 1;
+      if (keys['arrowdown'] || keys['s']) camera.position.z += 1;
+      if (keys['arrowleft'] || keys['a']) camera.position.x -= 1;
+      if (keys['arrowright'] || keys['d']) camera.position.x += 1;
+      if (keys[' ']) camera.position.y += 0.5;
+
+      camera.lookAt(ball.position);
+      renderer.render(scene, camera);
+    }
+
+    // Window Resize
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // Start Game
+    init();
+  </script>
+</body>
+</html>
